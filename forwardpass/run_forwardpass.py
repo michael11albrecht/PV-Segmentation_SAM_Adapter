@@ -18,7 +18,7 @@ def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
     download_.wgs84_download(lat_1, lon_1, lat_2, lon_2, f'{output_folder}/tiles_download')
 
     split = Split(2500, 256)
-    images = split.splitImages(f'{output_folder}/tiles_download')
+    images, geo_infos = split.splitImages(f'{output_folder}/tiles_download')
 
     save_ = Save()
     save_.saveImg(f'{output_folder}/split_img', images, '')
@@ -26,6 +26,8 @@ def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
     os.system(f'python fw_cuda.py --config {config} --model {model} --output_dir {output_folder}/pred_masks')
 
     run_overlay(f'{output_folder}/split_img', f'{output_folder}/pred_masks/png', f'{output_folder}/overlay')
+
+    run_save_geotiff(f'{output_folder}/pred_masks/png', geo_infos, f'{output_folder}/geotiff')
 
 
 
