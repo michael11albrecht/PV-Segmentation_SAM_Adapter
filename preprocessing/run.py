@@ -20,7 +20,7 @@ class Run:
             maskmaker.process()
 
             split = Split(input_size, split_size)
-            images = split.splitImages(f"data/masked_images_{filename}")
+            images = split.splitImages(f"data/masked_images_{filename}")[0]
             masks = split.splitMask(f"data/{filename}_masks")
 
             save_ = Save()
@@ -43,7 +43,7 @@ class Run:
             filename = geojson_file.split('.')[0]
 
             split = Split(input_size, split_size)
-            images = split.splitImages(split_images)
+            images = split.splitImages(split_images)[0]
             masks = split.splitMask(split_masks)
 
             save_ = Save()
