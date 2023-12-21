@@ -1,31 +1,31 @@
 import sys
 import os
-#adding path to the preprocessing module
-path = os.path.abspath('preprocessing')
-sys.path.append(path)
+
+#adding path to the some modules
+for modules in ['preprocessing', 'postprocessing']:
+    path = os.path.abspath(modules)
+    sys.path.append(path)
 
 from download_open_data import DownloadOpenData
 from split_return import Split
 from save_img_mask import Save
-import fw_cuda
+from ma_make_overlay import *
 import argparse
 from save_geo import run_save_geotiff
 
-#under construction
-
-def run(lat_1, lon_1, lat_2, lon_2, output_folder):
+def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
     download_ = DownloadOpenData()
-    download_.wgs84_download(lat_1, lon_1, lat_2, lon_2, output_folder)
+    download_.wgs84_download(lat_1, lon_1, lat_2, lon_2, f'{output_folder}/tiles_download')
 
     split = Split(2500, 256)
-    images, geo_info = split.splitImages(output_folder)
+    images = split.splitImages(f'{output_folder}/tiles_download')
 
     save_ = Save()
-    save_.saveImg('forwardpass/data/split_img', images, '')
+    save_.saveImg(f'{output_folder}/split_img', images, '')
 
-    fw_cuda.run_forwardpass('configs/ma_B_cuda_fw.yaml', 'save/_ma_B/dv_29_18/model_epoch_last.pth', 'output')
+    os.system(f'python fw_cuda.py --config {config} --model {model} --output_dir {output_folder}/pred_masks')
 
-    run_save_geotiff('output', geo_info, 'tif_masks')
+    run_overlay(f'{output_folder}/split_img', f'{output_folder}/pred_masks/png', f'{output_folder}/overlay')
 
 
 
@@ -35,7 +35,9 @@ if __name__ == '__main__':
     parser.add_argument('--lon_1', type=float)
     parser.add_argument('--lat_2', type=float)
     parser.add_argument('--lon_2', type=float)
-    parser.add_argument('--output_folder', default='forwardpass/data/tiles_download')
+    parser.add_argument('--config', type=str, default='configs/ma_B_cuda.yaml')
+    parser.add_argument('--model', type=str)
+    parser.add_argument('--output_folder', type=str, default='forwardpass/data')
 
     args = parser.parse_args()
 
@@ -43,6 +45,8 @@ if __name__ == '__main__':
     lon_1 = args.lon_1
     lat_2 = args.lat_2
     lon_2 = args.lon_2
+    config = args.config
+    model = args.model
     output_folder = args.output_folder
 
-    run(lat_1, lon_1, lat_2, lon_2, output_folder)
+    run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder)
