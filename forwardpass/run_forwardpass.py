@@ -9,6 +9,7 @@ from split_return import Split
 from save_img_mask import Save
 import fw_cuda
 import argparse
+from save_geo import run_save_geotiff
 
 #under construction
 
@@ -17,13 +18,14 @@ def run(lat_1, lon_1, lat_2, lon_2, output_folder):
     download_.wgs84_download(lat_1, lon_1, lat_2, lon_2, output_folder)
 
     split = Split(2500, 256)
-    images = split.splitImages(output_folder)
+    images, geo_info = split.splitImages(output_folder)
 
     save_ = Save()
     save_.saveImg('forwardpass/data/split_img', images, '')
 
     fw_cuda.run_forwardpass('configs/ma_B_cuda_fw.yaml', 'save/_ma_B/dv_29_18/model_epoch_last.pth', 'output')
 
+    run_save_geotiff('output', geo_info, 'tif_masks')
 
 
 
