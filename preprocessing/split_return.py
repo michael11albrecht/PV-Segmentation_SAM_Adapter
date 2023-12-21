@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import os
 from pathlib import Path
+import rasterio
 
 #only tested with 2500x2500 to 1024x1024 images
 class Split:
@@ -31,16 +32,20 @@ class Split:
 
     def splitImages(self, image_filepath):
         images = []
+        geo_infos = []
         for filename in os.listdir(image_filepath):
             im = Image.open(f"{image_filepath}/{filename}")
+            tiff = rasterio.open(f"{image_filepath}/{filename}")
+            tiff_coos = tiff.bounds #xmin=0,ymin=1,xmax=2,ymax=3 (utm32)
             q = 0
             for coos in self.split_coos_:
                 image_name = filename.split('.')[0]
                 image = im.crop(coos)
                 images.append((image,image_name,q))
+                geo_infos.append(self.splitImgGeoInfo(f'{image_name}_{q}_', tiff_coos, coos))
                 q += 1
         
-        return images
+        return images, geo_infos
     
     def splitMask(self, mask_filepath):
         masks = []
@@ -67,3 +72,15 @@ class Split:
                   new_bounding_box[f"{image_id}_{q}"] = (bounding_box[0]-coos[0],bounding_box[1]-coos[1],bounding_box[2]-coos[0],bounding_box[3]-coos[1])
             q += 1
         return new_bounding_box
+    
+    def splitImgGeoInfo(self, image_name, tiff_coos, coos):
+        
+        x_min = (coos[0]/self.in_size_) * (tiff_coos[2]-tiff_coos[0]) + tiff_coos[0]
+        y_min = (coos[1]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[1]
+        x_max = (coos[2]/self.in_size_) * (tiff_coos[2]-tiff_coos[0]) + tiff_coos[0]
+        y_max = (coos[3]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[1]
+
+        split_img_coos = {image_name: (x_min, y_min, x_max, y_max)}
+
+        return split_img_coos
+        
