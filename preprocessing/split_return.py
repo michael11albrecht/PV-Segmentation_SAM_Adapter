@@ -76,9 +76,9 @@ class Split:
     def splitImgGeoInfo(self, image_name, tiff_coos, coos):
         
         x_min = (coos[0]/self.in_size_) * (tiff_coos[2]-tiff_coos[0]) + tiff_coos[0]
-        y_min = (coos[1]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[3]
+        y_min = -(coos[1]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[3]
         x_max = (coos[2]/self.in_size_) * (tiff_coos[2]-tiff_coos[0]) + tiff_coos[0]
-        y_max = (coos[3]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[3]
+        y_max = -(coos[3]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[3]
 
         split_img_coos = {image_name: (x_min, y_min, x_max, y_max, self.dest_size_)}
 
