@@ -53,7 +53,10 @@ def create_overlay_stats(img_path, test_mask_path, pred_mask_path, save_path, th
                     output[row,col] = [0,0,255,128]
                     false_zero += 1
 
-        iou = true_one/(false_one+false_zero+true_one)
+        if false_one+false_zero+true_one != 0:
+            iou = true_one/(false_one+false_zero+true_one)
+        else:
+            iou = 1 # if no false positives or false negatives, iou is 1
         iou_list.append(iou)
         mean_iou = mean(iou_list)
         print(f' true Zero: {true_zero/sum_pixels}\n true One: {true_one/sum_pixels}\n total True: {(true_zero+true_one)/sum_pixels}\n false Zero: {false_zero/sum_pixels}\n false One: {false_one/sum_pixels}\n Total false: {(false_zero+false_one)/sum_pixels}')
@@ -68,7 +71,7 @@ def create_overlay_stats(img_path, test_mask_path, pred_mask_path, save_path, th
 
 
         plt.imshow(image_combined)
-        plt.title(f'yellow: positive, green: false positive, blue: false negative\nPredicted size difference: {np.sum(pred_mask)/np.sum(test_mask)}\nIoU: {true_one/(false_one+false_zero+true_one)}')
+        plt.title(f'yellow: positive, green: false positive, blue: false negative\nPredicted size difference: {np.sum(pred_mask)/np.sum(test_mask)}\nIoU: {iou}')
         plt.savefig(f'{save_path}/{filename}.png')
 
 

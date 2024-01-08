@@ -32,7 +32,7 @@ class Split:
 
     def splitImages(self, image_filepath):
         images = []
-        geo_infos = []
+        geo_infos = {}
         for filename in os.listdir(image_filepath):
             im = Image.open(f"{image_filepath}/{filename}")
             tiff = rasterio.open(f"{image_filepath}/{filename}")
@@ -42,7 +42,7 @@ class Split:
                 image_name = filename.split('.')[0]
                 image = im.crop(coos)
                 images.append((image,image_name,q))
-                geo_infos.append(self.splitImgGeoInfo(f'{image_name}_{q}_', tiff_coos, coos))
+                geo_infos.update(self.splitImgGeoInfo(f'{image_name}_{q}_', tiff_coos, coos))
                 q += 1
         
         return images, geo_infos
@@ -76,11 +76,11 @@ class Split:
     def splitImgGeoInfo(self, image_name, tiff_coos, coos):
         
         x_min = (coos[0]/self.in_size_) * (tiff_coos[2]-tiff_coos[0]) + tiff_coos[0]
-        y_min = (coos[1]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[1]
+        y_min = (coos[1]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[3]
         x_max = (coos[2]/self.in_size_) * (tiff_coos[2]-tiff_coos[0]) + tiff_coos[0]
-        y_max = (coos[3]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[1]
+        y_max = (coos[3]/self.in_size_) * (tiff_coos[3]-tiff_coos[1]) + tiff_coos[3]
 
-        split_img_coos = {image_name: (x_min, y_min, x_max, y_max)}
+        split_img_coos = {image_name: (x_min, y_min, x_max, y_max, self.dest_size_)}
 
         return split_img_coos
         
