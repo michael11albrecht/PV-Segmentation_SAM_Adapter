@@ -46,10 +46,10 @@ def create_search_tree(shapefile):
     threshold_y = (shapefile.bbox [3] - shapefile.bbox [1]) / (splits/2) + shapefile.bbox [1]
 
     #create tree
-    tree[shapefile.bbox[0],shapefile.bbox[1]] = {}
-    tree[shapefile.bbox[0],threshold_y] = {}
-    tree[threshold_x,shapefile.bbox[1]] = {}
-    tree[threshold_x,threshold_y] = {}
+    tree[shapefile.bbox[0],shapefile.bbox[1],threshold_x,threshold_y] = {}
+    tree[shapefile.bbox[0],threshold_y,threshold_x,shapefile.bbox[3]] = {}
+    tree[threshold_x,shapefile.bbox[1],shapefile.bbox[2],threshold_y] = {}
+    tree[threshold_x,threshold_y,shapefile.bbox[2],shapefile.bbox[3]] = {}
 
     #add shapes to tree
     for shape in shapefile.shapeRecords():
@@ -57,17 +57,17 @@ def create_search_tree(shapefile):
         if shape.shape.bbox[0] <= threshold_x:
             if shape.shape.bbox[1] <= threshold_y:
                 #q3
-                tree[shapefile.bbox[0],shapefile.bbox[1]].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[shapefile.bbox[0],shapefile.bbox[1],threshold_x,threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
             else:
                 #q2
-                tree[shapefile.bbox[0],threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[shapefile.bbox[0],threshold_y,threshold_x,shapefile.bbox[3]].update({tuple(shape.shape.bbox):shape.record.nutzart})
         else:
             if shape.shape.bbox[1] <= threshold_y:
                 #q4
-                tree[threshold_x,shapefile.bbox[1]].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[threshold_x,shapefile.bbox[1],shapefile.bbox[2],threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
             else:
                 #q1
-                tree[threshold_x,threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[threshold_x,threshold_y,shapefile.bbox[2],shapefile.bbox[3]].update({tuple(shape.shape.bbox):shape.record.nutzart})
         #top right
         if shape.shape.bbox[2] <= threshold_x:
             if shape.shape.bbox[3] <= threshold_y:
@@ -75,30 +75,33 @@ def create_search_tree(shapefile):
                 pass
             else:
                 #q2
-                tree[shapefile.bbox[0],threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[shapefile.bbox[0],threshold_y,threshold_x,shapefile.bbox[3]].update({tuple(shape.shape.bbox):shape.record.nutzart})
         else:
             if shape.shape.bbox[3] <= threshold_y:
                 #q4
-                tree[threshold_x,shapefile.bbox[1]].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[threshold_x,shapefile.bbox[1],shapefile.bbox[2],threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
             else:
                 #q1
-                tree[threshold_x,threshold_y].update({tuple(shape.shape.bbox):shape.record.nutzart})
+                tree[threshold_x,threshold_y,shapefile.bbox[2],shapefile.bbox[3]].update({tuple(shape.shape.bbox):shape.record.nutzart})
     return tree
         
 
 
 
-def find_usetype_inside_bb(shapefile, bbox, use_list):
+def find_usetype_inside_bb(shapefile, bbox, use_list, search_tree):
     """
     Returns the type of use of the shape object that contains the point (x,y).
     """
     use = False
     found = False
-    for shape in shapefile.shapeRecords():
-        if Overlaps(bbox, shape.shape.bbox):
+    for key in tree.keys():
+        if Overlaps(key, bbox):
             found = True
-            if check_if_usable(shape.record.nutzart, use_list):
-                use = True
+            for key2 in tree[key].keys():
+                if Overlaps(key2, bbox):
+                    found = True
+                    if check_if_usable(tree[key][key2], use_list):
+                        use = True
     if found == False:
         raise Exception(f"Bbox ({bbox[0]},{bbox[1]}) not in shapefile.")
     return use
@@ -114,5 +117,8 @@ def check_if_usable(usetype, use_list):
         return False
 
 
-#test    
-#print(find_usetype_inside_bb(load_shapefile('tn_09780'),[597627, 5292841, 597704, 5293004], use_list))
+#test
+shapefile = load_shapefile('tn_09780')
+tree = create_search_tree(shapefile)
+print(find_usetype_inside_bb(shapefile,[597627, 5292841, 597704, 5293004], use_list, tree))
+print(find_usetype_inside_bb(shapefile,[597327, 5292841, 597304, 5293004], use_list, tree))
