@@ -53,6 +53,7 @@ def getInnerTree(lk):
     tree = STRtree(geoms)
     return tree, use_types
     
+    
 
 def getLandUse(bbox, lk_tree, lk):
     # List of land use types that are considered usable (all of kind "Siedlung")
@@ -105,22 +106,8 @@ def getLkTree():
 def checkGeoList(geo_list, img_path):
     download_gpkg('forwardpass/data/alkis')
     lk_tree, lk = getLkTree()
-    for f_name, bbox in geo_list.items():
-        needed = getLandUse(bbox[0:3], lk_tree, lk)
+    for f_name, bbox in tqdm(geo_list.items(), desc='Checking land usage'):
+        needed = getLandUse(box(*bbox[0:4]), lk_tree, lk)
         if not needed:
             os.remove(f'{img_path}/{f_name}.png')
         
-
-#test
-bbox = (597627, 5292841, 597704, 5293004)
-bbox2 = (642652.25, 5365025.75, 642671.28, 5365071.72)
-bbox3 = (691478.00, 5337490.00, 691500.00, 5337510.00)
-bbox = box(*bbox3)
-
-start = datetime.now()
-
-download_gpkg('forwardpass/data/alkis')
-lk_tree, lk = getLkTree()
-print(getLandUse(bbox, lk_tree, lk))
-
-print(datetime.now() - start)
