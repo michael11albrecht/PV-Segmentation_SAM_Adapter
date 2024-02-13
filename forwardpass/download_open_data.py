@@ -71,7 +71,6 @@ class DownloadOpenData:
 
     def calculate_and_download(self, x1: str, y1: str, x2: str, y2: str, out_dir: str):
         """ Calculates and downloads all tiles needed to cover the area of interest. """
-        print(x1,x2,y1,y2)
         self.check_utm_coos(x1, y1, x2, y2)
         tiles = self.calculate_needed_tiles(x1, y1, x2, y2)
         self.download_list_of_tiles(tiles, out_dir)
