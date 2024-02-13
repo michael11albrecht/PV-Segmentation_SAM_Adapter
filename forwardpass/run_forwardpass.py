@@ -12,6 +12,7 @@ from save_img_mask import Save
 from ma_make_overlay import *
 import argparse
 from save_geo import run_save_geotiff
+from get_land_usage_gpkg import checkGeoList
 
 def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
     download_ = DownloadOpenData()
@@ -22,6 +23,8 @@ def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
 
     save_ = Save()
     save_.saveImg(f'{output_folder}/split_img', images, '')
+
+    checkGeoList(geo_infos, f'{output_folder}/split_img')
 
     os.system(f'python fw_cuda.py --config {config} --model {model} --output_dir {output_folder}/pred_masks')
 
