@@ -2,7 +2,6 @@ import fiona
 from shapely.geometry import shape, box
 from shapely.strtree import STRtree
 import pickle
-from datetime import datetime
 from tqdm import tqdm
 import os
 import requests
@@ -53,40 +52,42 @@ def getInnerTree(lk):
     tree = STRtree(geoms)
     return tree, use_types
     
-    
-
-def getLandUse(bbox, lk_tree, lk):
-    # List of land use types that are considered usable (all of kind "Siedlung")
-    use_list = ['Wohnbaufläche','Industrie- und Gewerbefläche','Halde','Bergbaubetrieb',
-                'Tagebau, Grube Steinbruch','Fläche gemischter Nutzung','Fläche besonderer funktionaler Prägung',
-                'Sport-, Freizeit- und Erholungsfläche','Friedhof']
-
+def findLks(bbox, lk_tree, lk):
     #find all layers (LK) that intersect the bbox
     lk_matches = lk_tree.query(bbox)
     
     lks = []
     for match in lk_matches:
         lks.append(lk[match][0])
+    return lks
 
-    for lk in lks:
-        #load inner tree and use_types or create them if they don't exist
-        try:
-            with open(f'forwardpass/data/alkis/tree_{lk}.pkl', 'rb') as f:
-                inner_tree = pickle.load(f)
-            with open(f'forwardpass/data/alkis/use_{lk}.pkl', 'rb') as f:
-                use_types = pickle.load(f)
-        except:
-            inner_tree, use_types = getInnerTree(lk)
-            with open(f'forwardpass/data/alkis/tree_{lk}.pkl', 'wb') as f:
-                pickle.dump(inner_tree, f)
-            with open(f'forwardpass/data/alkis/use_{lk}.pkl', 'wb') as f:
-                pickle.dump(use_types, f)
-        matches = inner_tree.query(bbox)
-        for match in matches:
-            if use_types[match] in use_list:
-                return True
+def loadInnerTree(lk):
+    #load inner tree and use_types or create them if they don't exist
+    try:
+        with open(f'forwardpass/data/alkis/tree_{lk}.pkl', 'rb') as f:
+            inner_tree = pickle.load(f)
+        with open(f'forwardpass/data/alkis/use_{lk}.pkl', 'rb') as f:
+            use_types = pickle.load(f)
+    except:
+        inner_tree, use_types = getInnerTree(lk)
+        with open(f'forwardpass/data/alkis/tree_{lk}.pkl', 'wb') as f:
+            pickle.dump(inner_tree, f)
+        with open(f'forwardpass/data/alkis/use_{lk}.pkl', 'wb') as f:
+            pickle.dump(use_types, f)
+    return inner_tree, use_types
 
-    return False
+def getLandUse(bbox, inner_tree, use_types):
+    # List of land use types that are considered usable (all of kind "Siedlung")
+    use_list = ['Wohnbaufläche','Industrie- und Gewerbefläche','Halde','Bergbaubetrieb',
+                'Tagebau, Grube Steinbruch','Fläche gemischter Nutzung','Fläche besonderer funktionaler Prägung',
+                'Sport-, Freizeit- und Erholungsfläche','Friedhof']
+
+    matches = inner_tree.query(bbox)
+    found_matches = len(matches) > 0
+    for match in matches:
+        if use_types[match] in use_list:
+            return True, found_matches
+    return False, found_matches
 
 def getLkTree():
     #load lk_tree and lk or create them if they don't exist
@@ -103,11 +104,33 @@ def getLkTree():
             pickle.dump(lk, f)
     return lk_tree, lk
 
+def checkLandRemove(bbox, inner_tree, use_types, img_path, f_name):
+    needed, found_match = getLandUse(box(*bbox), inner_tree, use_types)
+    if found_match and not needed:
+        os.remove(f'{img_path}/{f_name}.png')
+    return found_match
+
 def checkGeoList(geo_list, img_path):
     download_gpkg('forwardpass/data/alkis')
-    lk_tree, lk = getLkTree()
+    lk_tree, lk_bb = getLkTree()
+    lk = None
+    inner_tree = None
+    use_types = None
     for f_name, bbox in tqdm(geo_list.items(), desc='Checking land usage'):
-        needed = getLandUse(box(*bbox[0:4]), lk_tree, lk)
-        if not needed:
-            os.remove(f'{img_path}/{f_name}.png')
+        lks = findLks(box(*bbox[0:4]), lk_tree, lk_bb)
+        if lks[0] != lk or len(lks) > 1:
+            found_match = False
+            for new_lk in lks:
+                if new_lk == lk:
+                    found_match = checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
+                    if found_match:
+                        # if right lk was found, no need to check the others
+                        # could be problematic for tiles that are on the border of two lks --> checking for every bbox overlap takes too much time
+                        break
+            if not found_match:
+                for lk in lks:
+                    inner_tree, use_types = loadInnerTree(lk)
+                    checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
+        else:
+            checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
         
