@@ -17,7 +17,7 @@ def download_gpkg(out_dir):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)        
     if not os.path.exists(out_file):
-        print(f'Downloading {filename} around 5GB')
+        print(f'Downloading {filename} about 5GB')
         r = requests.get(url, allow_redirects=True, stream=True)
         total = int(r.headers.get('content-length', 0))
         with open(out_file, 'wb') as file, tqdm(
@@ -101,6 +101,15 @@ def getLkTree():
         with open('forwardpass/data/alkis/lk.pkl', 'wb') as f:
             pickle.dump(lk, f)
     return lk_tree, lk
+
+def checkGeoList(geo_list, img_path):
+    download_gpkg('forwardpass/data/alkis')
+    lk_tree, lk = getLkTree()
+    for f_name, bbox in geo_list.items():
+        needed = getLandUse(bbox[0:3], lk_tree, lk)
+        if not needed:
+            os.remove(f'{img_path}/{f_name}.png')
+        
 
 #test
 bbox = (597627, 5292841, 597704, 5293004)
