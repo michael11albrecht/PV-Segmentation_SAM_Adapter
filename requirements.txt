@@ -47,3 +47,4 @@ openmim
 pyproj
 fiona
 shapely
+requests
