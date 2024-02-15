@@ -78,9 +78,9 @@ def loadInnerTree(lk):
 
 def getLandUse(bbox, inner_tree, use_types):
     # List of land use types that are considered usable (all of kind "Siedlung")
-    use_list = ['Wohnbaufläche','Industrie- und Gewerbefläche','Halde','Bergbaubetrieb',
-                'Tagebau, Grube Steinbruch','Fläche gemischter Nutzung','Fläche besonderer funktionaler Prägung',
-                'Sport-, Freizeit- und Erholungsfläche','Friedhof']
+    use_list = ['Wohnbaufläche','Industrie- und Gewerbefläche',
+                'Fläche gemischter Nutzung','Fläche besonderer funktionaler Prägung',
+                'Sport-, Freizeit- und Erholungsfläche']
 
     matches = inner_tree.query(bbox)
     found_matches = len(matches) > 0
@@ -125,7 +125,7 @@ def checkGeoList(geo_list, img_path):
                     found_match = checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
                     if found_match:
                         # if right lk was found, no need to check the others
-                        # could be problematic for tiles that are on the border of two lks --> checking for every bbox overlap takes too much time
+                        # could be problematic for tiles that are on the border of two or more lks --> checking for every bbox overlap takes too much time
                         break
             if not found_match:
                 for lk in lks:
