@@ -33,6 +33,9 @@ def download_gpkg(out_dir):
         print(f'File {out_file} already exists, skipping download.')
 
 def buildLKTree():
+    '''
+    Builds a spatial index for all layers (Landkreise) in the gpkg file and returns it
+    '''
     lk = []
     for layer in fiona.listlayers('forwardpass/data/alkis/Nutzung_kreis.gpkg'):
         lk.append((layer,fiona.open('forwardpass/data/alkis/Nutzung_kreis.gpkg', layer=layer).bounds))
@@ -41,6 +44,9 @@ def buildLKTree():
     
 
 def getInnerTree(lk):
+    '''
+    Builds a spatial index for all land use polygons in the layer lk and returns it (to search inside the Landkreis)
+    '''
     geoms = []
     use_types = []
     with fiona.open('forwardpass/data/alkis/Nutzung_kreis.gpkg', layer=lk) as src:
@@ -53,7 +59,9 @@ def getInnerTree(lk):
     return tree, use_types
     
 def findLks(bbox, lk_tree, lk):
-    #find all layers (LK) that intersect the bbox
+    '''
+    Returns all layers (LK) that intersect the bbox
+    '''
     lk_matches = lk_tree.query(bbox)
     
     lks = []
@@ -62,7 +70,9 @@ def findLks(bbox, lk_tree, lk):
     return lks
 
 def loadInnerTree(lk):
-    #load inner tree and use_types or create them if they don't exist
+    '''
+    Loads the inner tree and use_types for the layer lk from the pickle files or creates them if they don't exist
+    '''
     try:
         with open(f'forwardpass/data/alkis/tree_{lk}.pkl', 'rb') as f:
             inner_tree = pickle.load(f)
@@ -77,6 +87,9 @@ def loadInnerTree(lk):
     return inner_tree, use_types
 
 def getLandUse(bbox, inner_tree, use_types):
+    '''
+    Returns True if the bbox intersects with a land use polygon of the specified type
+    '''
     # List of land use types that are considered usable (all of kind "Siedlung")
     use_list = ['Wohnbaufläche','Industrie- und Gewerbefläche',
                 'Fläche gemischter Nutzung','Fläche besonderer funktionaler Prägung',
@@ -89,7 +102,9 @@ def getLandUse(bbox, inner_tree, use_types):
     return False
 
 def getLkTree():
-    #load lk_tree and lk or create them if they don't exist
+    '''
+    Loads the lk_tree and lk from the pickle files or creates them if they don't exist
+    '''
     try:
         with open('forwardpass/data/alkis/lk_tree.pkl', 'rb') as f:
             lk_tree = pickle.load(f)
@@ -103,11 +118,10 @@ def getLkTree():
             pickle.dump(lk, f)
     return lk_tree, lk
 
-def checkLandRemove(bbox, inner_tree, use_types, img_path, f_name):
-    needed = getLandUse(box(*bbox), inner_tree, use_types)
-    return needed
-
 def checkGeoList(geo_list, img_path):
+    '''
+    Checks the land usage for all images in the geo_list and deletes the ones that are not needed
+    '''
     download_gpkg('forwardpass/data/alkis')
     lk_tree, lk_bb = getLkTree()
     inner_tree = {}
@@ -120,7 +134,7 @@ def checkGeoList(geo_list, img_path):
             for lk in lks:
                 use_types[lk] = (t_use, use_types[lk][1])
                 t_use += 1
-                needed = checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk][1], img_path, f_name)
+                needed = getLandUse(box(*bbox[0:4]), inner_tree[lk], use_types[lk][1])
             if not needed:
                 os.remove(f'{img_path}/{f_name}.png')
         else:
@@ -129,7 +143,7 @@ def checkGeoList(geo_list, img_path):
                 inner_tree[lk] = new_inner_tree
                 use_types[lk] = (t_use, new_use_types)
                 t_use += 1
-                needed = checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk][1], img_path, f_name)
+                needed = getLandUse(box(*bbox[0:4]), inner_tree[lk], use_types[lk][1])
                 if len(use_types) > 4:
                     min_key = min(use_types, key=lambda k: use_types[k][0])
                     del inner_tree[min_key]
