@@ -81,13 +81,12 @@ def getLandUse(bbox, inner_tree, use_types):
     use_list = ['Wohnbaufläche','Industrie- und Gewerbefläche',
                 'Fläche gemischter Nutzung','Fläche besonderer funktionaler Prägung',
                 'Sport-, Freizeit- und Erholungsfläche']
-
+    
     matches = inner_tree.query(bbox)
-    found_matches = len(matches) > 0
     for match in matches:
         if use_types[match] in use_list:
-            return True, found_matches
-    return False, found_matches
+            return True
+    return False
 
 def getLkTree():
     #load lk_tree and lk or create them if they don't exist
@@ -105,33 +104,36 @@ def getLkTree():
     return lk_tree, lk
 
 def checkLandRemove(bbox, inner_tree, use_types, img_path, f_name):
-    needed, found_match = getLandUse(box(*bbox), inner_tree, use_types)
-    if found_match and not needed:
-        os.remove(f'{img_path}/{f_name}.png')
-    return found_match
+    needed = getLandUse(box(*bbox), inner_tree, use_types)
+    return needed
 
 def checkGeoList(geo_list, img_path):
     download_gpkg('forwardpass/data/alkis')
     lk_tree, lk_bb = getLkTree()
-    inner_tree = None
-    use_types = None
+    inner_tree = {}
+    use_types = {}
     t_use = 0
     for f_name, bbox in tqdm(geo_list.items(), desc='Checking land usage'):
         lks = findLks(box(*bbox[0:4]), lk_tree, lk_bb)
-        if lks in inner_tree.keys():
+        needed = True
+        if set(inner_tree.keys()).issuperset(set(lks)):
             for lk in lks:
-                use_types[lk] = (t_use, use_types[lk])
+                use_types[lk] = (t_use, use_types[lk][1])
                 t_use += 1
-                checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk], img_path, f_name)
+                needed = checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk][1], img_path, f_name)
+            if not needed:
+                os.remove(f'{img_path}/{f_name}.png')
         else:
             for lk in lks:
                 new_inner_tree, new_use_types = loadInnerTree(lk)
                 inner_tree[lk] = new_inner_tree
                 use_types[lk] = (t_use, new_use_types)
                 t_use += 1
-                checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk], img_path, f_name)
+                needed = checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk][1], img_path, f_name)
                 if len(use_types) > 4:
                     min_key = min(use_types, key=lambda k: use_types[k][0])
                     del inner_tree[min_key]
                     del use_types[min_key]
+            if not needed:
+                os.remove(f'{img_path}/{f_name}.png')
         
