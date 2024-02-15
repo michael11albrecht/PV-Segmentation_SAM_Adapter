@@ -113,24 +113,25 @@ def checkLandRemove(bbox, inner_tree, use_types, img_path, f_name):
 def checkGeoList(geo_list, img_path):
     download_gpkg('forwardpass/data/alkis')
     lk_tree, lk_bb = getLkTree()
-    lk = None
     inner_tree = None
     use_types = None
+    t_use = 0
     for f_name, bbox in tqdm(geo_list.items(), desc='Checking land usage'):
         lks = findLks(box(*bbox[0:4]), lk_tree, lk_bb)
-        if lks[0] != lk or len(lks) > 1:
-            found_match = False
-            for new_lk in lks:
-                if new_lk == lk:
-                    found_match = checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
-                    if found_match:
-                        # if right lk was found, no need to check the others
-                        # could be problematic for tiles that are on the border of two or more lks --> checking for every bbox overlap takes too much time
-                        break
-            if not found_match:
-                for lk in lks:
-                    inner_tree, use_types = loadInnerTree(lk)
-                    checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
+        if lks in inner_tree.keys():
+            for lk in lks:
+                use_types[lk] = (t_use, use_types[lk])
+                t_use += 1
+                checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk], img_path, f_name)
         else:
-            checkLandRemove(bbox[0:4], inner_tree, use_types, img_path, f_name)
+            for lk in lks:
+                new_inner_tree, new_use_types = loadInnerTree(lk)
+                inner_tree[lk] = new_inner_tree
+                use_types[lk] = (t_use, new_use_types)
+                t_use += 1
+                checkLandRemove(bbox[0:4], inner_tree[lk], use_types[lk], img_path, f_name)
+                if len(use_types) > 4:
+                    min_key = min(use_types, key=lambda k: use_types[k][0])
+                    del inner_tree[min_key]
+                    del use_types[min_key]
         
