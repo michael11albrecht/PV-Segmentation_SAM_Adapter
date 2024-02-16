@@ -131,12 +131,14 @@ def checkGeoList(geo_list, img_path):
     t_use = 0
     for f_name, bbox in tqdm(geo_list.items(), desc='Checking land usage'):
         lks = findLks(box(*bbox[0:4]), lk_tree, lk_bb)
-        needed = True
+        needed = None
         if set(inner_tree.keys()).issuperset(set(lks)):
             for lk in lks:
                 use_types[lk] = (t_use, use_types[lk][1])
                 t_use += 1
                 needed = getLandUse(box(*bbox[0:4]), inner_tree[lk], use_types[lk][1])
+                if needed:
+                    break
             if not needed:
                 os.remove(f'{img_path}/{f_name}.png')
         else:
@@ -150,6 +152,8 @@ def checkGeoList(geo_list, img_path):
                     min_key = min(use_types, key=lambda k: use_types[k][0])
                     del inner_tree[min_key]
                     del use_types[min_key]
+                if needed:
+                    break
             if not needed:
                 os.remove(f'{img_path}/{f_name}.png')
         
