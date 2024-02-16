@@ -4,6 +4,7 @@ import rasterio
 from rasterio.transform import from_origin
 import os
 import cv2 as cv
+from tqdm import tqdm
 
 def saveGeotiff(image_path, geo_info, output_path):
     # Open the image and convert it to numpy array
@@ -31,7 +32,7 @@ def saveGeotiff(image_path, geo_info, output_path):
         dst.write(binary_img, indexes=1)
 
 def run_save_geotiff(pred_path, geo_info, output_path):
-    for filename in os.listdir(pred_path):
+    for filename in tqdm(os.listdir(pred_path), desc="Saving GeoTIFFs"):
         clean_filename = filename.split('.')[0]
         file_geo_info = geo_info[clean_filename]
         saveGeotiff(os.path.join(pred_path, filename), file_geo_info, os.path.join(output_path, f'{clean_filename}.tif'))

@@ -3,9 +3,10 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import os
+from tqdm import tqdm
 
 def run_overlay(img_folder_path, mask_folder_path, overlay_folder_path):
-    for filename in os.listdir(mask_folder_path):
+    for filename in tqdm(os.listdir(mask_folder_path), desc="Saveing overlay images"):
         mask_array = img2np(f'{mask_folder_path}/{filename}')
         img_array = img2np(f'{img_folder_path}/{filename}')
         mask_array = cv2.resize(mask_array, (256, 256))

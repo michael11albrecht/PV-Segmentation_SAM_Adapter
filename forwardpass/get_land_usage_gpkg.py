@@ -79,6 +79,7 @@ def loadInnerTree(lk):
         with open(f'forwardpass/data/alkis/use_{lk}.pkl', 'rb') as f:
             use_types = pickle.load(f)
     except:
+        print(f'Building search tree for {lk}')
         inner_tree, use_types = getInnerTree(lk)
         with open(f'forwardpass/data/alkis/tree_{lk}.pkl', 'wb') as f:
             pickle.dump(inner_tree, f)
@@ -111,6 +112,7 @@ def getLkTree():
         with open('forwardpass/data/alkis/lk.pkl', 'rb') as f:
             lk = pickle.load(f)
     except:
+        print('Building search tree for Districts (LK)')
         lk_tree, lk = buildLKTree()
         with open('forwardpass/data/alkis/lk_tree.pkl', 'wb') as f:
             pickle.dump(lk_tree, f)
