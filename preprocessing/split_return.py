@@ -17,16 +17,20 @@ class Split:
         #calculating the overlap on each side (half_overlap)
         t = width_height//self.dest_size_
         left = width_height%self.dest_size_
-        overlap = self.dest_size_-left
-        half_overlap = overlap//2
+        total_overlap = self.dest_size_-left
+        overlap = total_overlap//t
 
         split_coos = []
 
-        for r in range(t+1):
-           for c in range(t+1):
-               #xmin,ymin,xmax,ymax
-               split_coos.append((c*self.dest_size_-c*half_overlap,r*self.dest_size_-r*half_overlap,(c+1)*self.dest_size_-c*half_overlap,(r+1)*self.dest_size_-r*half_overlap))
-        
+        for r in range(t):
+            for c in range(t):
+                #xmin,ymin,xmax,ymax
+                split_coos.append((c*self.dest_size_-c*overlap,r*self.dest_size_-r*overlap,(c+1)*self.dest_size_-c*overlap,(r+1)*self.dest_size_-r*overlap))
+            #to make sure that the whole image is covered (rows)    
+            split_coos.append((width_height-self.dest_size_,r*self.dest_size_-r*overlap,width_height,(r+1)*self.dest_size_-r*overlap))
+        #to make sure that the whole image is covered (columns)
+        split_coos.append((width_height-self.dest_size_,width_height-self.dest_size_,width_height,width_height))
+           
         return split_coos
     
 
