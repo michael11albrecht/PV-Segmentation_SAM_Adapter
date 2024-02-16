@@ -102,6 +102,8 @@ Postprocessing:
 (DOP: Bayerische Vermessungsverwaltung – [www.geodaten.bayern.de](https://geodaten.bayern.de/opengeodata/OpenDataDetail.html?pn=dop40) (Daten verändert), Lizenz: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)) 
     - mean IoU over 88 test-images: 0.47306
 
+- Forwardpass using the 30 epochs Weights ![visualisation](https://github.com/michael11albrecht/PV-Segmentation_SAM_Adapter/blob/main/readme/ALKIS.PNG?raw=true)
+
 # Information:
 - pyTorch-SAM-adapter based on [Sam-Adapter-Pytorch](https://github.com/tianrun-chen/SAM-Adapter-PyTorch)
 - supported by [Fortiss](https://fortiss.org)
