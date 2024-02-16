@@ -6,19 +6,26 @@ import rasterio
 
 #only tested with 2500x2500 to 1024x1024 images
 class Split:
-    def __init__(self, in_size = 2500, dest_size = 1024):
+    def __init__(self, in_size = 2500, dest_size = 1024, artificial_overlap = 0):
         self.dest_size_ = dest_size
         self.in_size_ = in_size
+        if artificial_overlap < 1 and artificial_overlap >= 0:
+            self.artificial_overlap_ = artificial_overlap
+        else:
+            raise ValueError('Artificial overlap must be between 0 and 0.99 (1 would mean 100pct overlap)')
         self.split_coos_ = self.calcSplit(self.in_size_)
 
     
     def calcSplit(self, width_height):
         #only one calculation because working with squared formats
         #calculating the overlap on each side (half_overlap)
-        t = width_height//self.dest_size_
-        left = width_height%self.dest_size_
-        total_overlap = self.dest_size_-left
-        overlap = total_overlap//t
+        #calculating an artificial overlap to based on input 0-0.99 to create more trainings images
+        px_artificial_overlap = int(self.dest_size_*self.artificial_overlap_)
+        art_left = self.dest_size_-px_artificial_overlap
+        t = width_height//art_left
+        left = width_height%art_left
+        total_overlap = art_left-left
+        overlap = (total_overlap//t)+px_artificial_overlap
 
         split_coos = []
 
@@ -30,7 +37,7 @@ class Split:
             split_coos.append((width_height-self.dest_size_,r*self.dest_size_-r*overlap,width_height,(r+1)*self.dest_size_-r*overlap))
         #to make sure that the whole image is covered (columns)
         split_coos.append((width_height-self.dest_size_,width_height-self.dest_size_,width_height,width_height))
-           
+        
         return split_coos
     
 
