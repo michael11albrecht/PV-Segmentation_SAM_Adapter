@@ -1,11 +1,12 @@
 from PIL import Image
 import numpy as np
 import os
+from tqdm import tqdm
 
 class Save:
     def saveImg(self, folder_path, images, json_file):
         if not os.path.isdir(folder_path): os.makedirs(folder_path)
-        for image in images:
+        for image in tqdm(images, desc=f'Saving {json_file} images'):
             image[0].save(f'{folder_path}/{image[1]}_{image[2]}_{json_file}.png')
 
 

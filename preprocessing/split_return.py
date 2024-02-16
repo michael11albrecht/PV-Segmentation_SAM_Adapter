@@ -3,6 +3,7 @@ import numpy as np
 import os
 from pathlib import Path
 import rasterio
+from tqdm import tqdm
 
 #only tested with 2500x2500 to 1024x1024 images
 class Split:
@@ -44,7 +45,7 @@ class Split:
     def splitImages(self, image_filepath):
         images = []
         geo_infos = {}
-        for filename in os.listdir(image_filepath):
+        for filename in tqdm(os.listdir(image_filepath), desc="Splitting images"):
             im = Image.open(f"{image_filepath}/{filename}")
             tiff = rasterio.open(f"{image_filepath}/{filename}")
             tiff_coos = tiff.bounds #xmin=0,ymin=1,xmax=2,ymax=3 (utm32)
