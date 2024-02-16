@@ -34,9 +34,12 @@ class Split:
             for c in range(t):
                 #xmin,ymin,xmax,ymax
                 split_coos.append((c*self.dest_size_-c*overlap,r*self.dest_size_-r*overlap,(c+1)*self.dest_size_-c*overlap,(r+1)*self.dest_size_-r*overlap))
-            #to make sure that the whole image is covered (rows)    
+            #to make sure that the whole image is covered (columns)    
             split_coos.append((width_height-self.dest_size_,r*self.dest_size_-r*overlap,width_height,(r+1)*self.dest_size_-r*overlap))
-        #to make sure that the whole image is covered (columns)
+        #to make sure that the whole image is covered (rows)
+        for c in range(t):
+                split_coos.append((c*self.dest_size_-c*overlap,width_height-self.dest_size_,(c+1)*self.dest_size_-c*overlap,width_height))
+        #bottom right corner
         split_coos.append((width_height-self.dest_size_,width_height-self.dest_size_,width_height,width_height))
         
         return split_coos
