@@ -94,13 +94,13 @@ Postprocessing:
 
 
 # Results:
-- after 20 epochs training: [Dropbox](https://www.dropbox.com/scl/fo/fkaq4v9izj69md45fa6b6/h?rlkey=0dmuoq15f9n3s2fohkvt1etz6&dl=0) 
+- after 20 epochs training: [Dropbox](https://www.dropbox.com/scl/fo/fkaq4v9izj69md45fa6b6/h?rlkey=c5nn96kb3h8aoy7appsg55xde&dl=0) 
 (DOP: Bayerische Vermessungsverwaltung – [www.geodaten.bayern.de](https://geodaten.bayern.de/opengeodata/OpenDataDetail.html?pn=dop40) (Daten verändert), Lizenz: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de))
     - mean IoU over 88 test-images: 0.47234
-
-- after 30 epochs training: [Dropbox](https://www.dropbox.com/scl/fi/i84e584qwqv15oo2ohspq/32682_5340_54_tepe.png?rlkey=jdlfuqil8d3rk7f9ylg0ypvh8&dl=0)
+- after 30 epochs training: [Dropbox](https://www.dropbox.com/scl/fo/ffs96v2vlc4ag1qlta19r/h?rlkey=ns63p2ae7fdjt8dfs84aduaez&dl=0)
 (DOP: Bayerische Vermessungsverwaltung – [www.geodaten.bayern.de](https://geodaten.bayern.de/opengeodata/OpenDataDetail.html?pn=dop40) (Daten verändert), Lizenz: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)) 
     - mean IoU over 88 test-images: 0.47306
+- Trained weights after 30 epochs: [Download](https://www.dropbox.com/scl/fo/38ltgx256k4pehvc4u5wq/h?rlkey=luip8tn2lm2mrgve5uk3zhfff&dl=0)
 
 # Information:
 - pyTorch-SAM-adapter based on [Sam-Adapter-Pytorch](https://github.com/tianrun-chen/SAM-Adapter-PyTorch)
