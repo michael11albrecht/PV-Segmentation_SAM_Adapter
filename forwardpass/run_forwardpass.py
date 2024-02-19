@@ -13,6 +13,7 @@ from ma_make_overlay import *
 import argparse
 from save_geo import run_save_geotiff
 from get_land_usage_gpkg import checkGeoList
+from calc_area import main as calc_area
 
 def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
     download_ = DownloadOpenData()
@@ -32,6 +33,7 @@ def run(lat_1, lon_1, lat_2, lon_2, config, model, output_folder):
 
     run_save_geotiff(f'{output_folder}/pred_masks/png', geo_infos, f'{output_folder}/geotiff')
 
+    calc_area(f'{output_folder}/geotiff', 2500, 1000)
 
 
 if __name__ == '__main__':

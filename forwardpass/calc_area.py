@@ -73,12 +73,7 @@ def calc_whole_area(masks_path, tile_size_px, tile_size_m):
         area += calc_area(masks_path, tile, tile_size_px, tile_size_m)
     return area
 
-def main():
-    masks_path = "forwardpass/data/geotiff"
-    tile_size_px = 2500
-    tile_size_m = 1000
+def main(masks_path, tile_size_px, tile_size_m):
     area = calc_whole_area(masks_path, tile_size_px, tile_size_m)
     print(f'{area}m^2 of the tiles is covered by PV.')
     print(f'{area/((tile_size_m**2)*len(get_tiles(masks_path)))}% of the tiles is covered by PV.')
-
-main()
