@@ -5,7 +5,7 @@ from pathlib import Path
 import rasterio
 from tqdm import tqdm
 
-#only tested with 2500x2500 to 1024x1024 images
+#only tested with 2500x2500 images
 class Split:
     def __init__(self, in_size = 2500, dest_size = 1024, artificial_overlap = 0):
         self.dest_size_ = dest_size
