@@ -77,3 +77,4 @@ def main(masks_path, tile_size_px, tile_size_m):
     area = calc_whole_area(masks_path, tile_size_px, tile_size_m)
     print(f'{area}m^2 of the tiles is covered by PV.')
     print(f'{area/((tile_size_m**2)*len(get_tiles(masks_path)))}% of the tiles is covered by PV.')
+    print(f'Calculated with 0.2kW/m^2 peak this would be {area*0.2}kW of peak power.')
