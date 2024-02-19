@@ -127,9 +127,9 @@ Forwardpass:
 - after 30 epochs training: [Dropbox](https://www.dropbox.com/scl/fo/ffs96v2vlc4ag1qlta19r/h?rlkey=ns63p2ae7fdjt8dfs84aduaez&dl=0)
 (DOP: Bayerische Vermessungsverwaltung – [www.geodaten.bayern.de](https://geodaten.bayern.de/opengeodata/OpenDataDetail.html?pn=dop40) (Daten verändert), Lizenz: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)) 
     - mean IoU over 88 test-images: 0.47306
-- Trained weights after 30 epochs: [Download](https://www.dropbox.com/scl/fo/38ltgx256k4pehvc4u5wq/h?rlkey=luip8tn2lm2mrgve5uk3zhfff&dl=0)
-
-- Forwardpass using the 30 epochs Weights ![visualisation](https://github.com/michael11albrecht/PV-Segmentation_SAM_Adapter/blob/main/readme/ALKIS.PNG?raw=true)
+- Trained weights after 30 epochs: [Dropbox](https://www.dropbox.com/scl/fo/38ltgx256k4pehvc4u5wq/h?rlkey=luip8tn2lm2mrgve5uk3zhfff&dl=0)
+- Forwardpass using the 30 epochs weights: ![visualisation](https://github.com/michael11albrecht/PV-Segmentation_SAM_Adapter/blob/main/readme/ALKIS.PNG?raw=true)
+- Loss during the 30 epochs training: ![loss_plot](https://github.com/michael11albrecht/PV-Segmentation_SAM_Adapter/blob/main/readme/loss_plot.png?raw=true)
 
 # Information:
 - pyTorch-SAM-adapter based on [Sam-Adapter-Pytorch](https://github.com/tianrun-chen/SAM-Adapter-PyTorch)
