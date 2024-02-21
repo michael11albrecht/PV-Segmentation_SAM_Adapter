@@ -129,6 +129,10 @@ Forwardpass:
     - mean IoU over 88 test-images: 0.47306
 - Trained weights after 30 epochs: [Dropbox](https://www.dropbox.com/scl/fo/38ltgx256k4pehvc4u5wq/h?rlkey=luip8tn2lm2mrgve5uk3zhfff&dl=0)
 - Forwardpass using the 30 epochs weights: ![visualisation](https://github.com/michael11albrecht/PV-Segmentation_SAM_Adapter/blob/main/readme/ALKIS.PNG?raw=true)
+    - red: predicted PV-Systems
+    - yellow: split-tiles used for prediction (based on ALKIS land usage)
+    - polygons: ALKIS land usage (areas with potential PV)
+    - purple-marker: area defining points (fw-input)
 - Loss during the 30 epochs training: ![loss_plot](https://github.com/michael11albrecht/PV-Segmentation_SAM_Adapter/blob/main/readme/loss_plot.png?raw=true)
 
 # Information:
